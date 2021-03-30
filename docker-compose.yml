@@ -1,0 +1,41 @@
+version: '3.3'
+services:
+  db:
+    image: postgres:12
+    container_name: hasura_db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: password
+
+  hasura:
+    # image: hasura/graphql-engine:v1.3.3
+    image: hasura/graphql-engine:v1.3.3.cli-migrations-v2
+    container_name: hasura
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - "db"
+    volumes:
+      - ./hasura/migrations:/hasura-migrations
+      - ./hasura/metadata:/hasura-metadata
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:password@hasura_db:5432/postgres
+      HASURA_GRAPHQL_ADMIN_SECRET: admin_secret_for_testing
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_UNAUTHORIZED_ROLE: anonymous
+
+  karate:
+    build: ./karate
+    container_name: karate
+    ports:
+      - "5900:5900"
+    depends_on:
+      - "hasura"
+    volumes:
+      # Tests to be run:
+      - ./karate/tests:/src/features
+      # Where results will be generated:
+      - ./karate/results:/src/target

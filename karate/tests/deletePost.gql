@@ -1,0 +1,8 @@
+mutation deletePost($title: String) {
+  delete_cms_post(where: {title: {_eq: $title}}) {
+    affected_rows
+    returning {
+      title
+    }
+  }
+}

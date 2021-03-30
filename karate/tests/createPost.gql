@@ -1,0 +1,5 @@
+mutation createPost($title: String, $content: String, $status: String) {
+  insert_cms_post(objects: {title: $title, content: $content, status: $status}) {
+    affected_rows
+  }
+}

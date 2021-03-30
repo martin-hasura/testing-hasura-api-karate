@@ -1,0 +1,14 @@
+query getPosts($status: String) {
+  cms_post(where: {status: {_eq: $status}}) {
+    id
+    title
+    content
+    status
+    created_at
+    author_id
+    user {
+      username
+      role
+    }
+  }
+}
