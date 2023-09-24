@@ -1,41 +1,57 @@
 version: '3.3'
 services:
-  db:
+  postgres:
     image: postgres:12
-    container_name: hasura_db
+    container_name: hasura_postgres
     restart: always
     ports:
       - "5432:5432"
+    volumes:
+      - ./postgres/:/docker-entrypoint-initdb.d/
     environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 25
 
   hasura:
-    # image: hasura/graphql-engine:v1.3.3
-    image: hasura/graphql-engine:v1.3.3.cli-migrations-v2
+    image: hasura/graphql-engine:v2.33.4
     container_name: hasura
     restart: always
     ports:
       - "8080:8080"
-    depends_on:
-      - "db"
     volumes:
-      - ./hasura/migrations:/hasura-migrations
-      - ./hasura/metadata:/hasura-metadata
+      - ./hasura:/hasura
     environment:
-      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:password@hasura_db:5432/postgres
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:password@postgres:5432/postgres
       HASURA_GRAPHQL_ADMIN_SECRET: admin_secret_for_testing
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
       HASURA_GRAPHQL_UNAUTHORIZED_ROLE: anonymous
+      # TODO: For compatibility to V1 queries, need to update Karate tests for V2
+      HASURA_GRAPHQL_V1_BOOLEAN_NULL_COLLAPSE: "true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
+      interval: 5s
+      timeout: 5s
+      retries: 25
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   karate:
     build: ./karate
-    container_name: karate
+    container_name: hasure_karate
     ports:
       - "5900:5900"
-    depends_on:
-      - "hasura"
     volumes:
       # Tests to be run:
       - ./karate/tests:/src/features
       # Where results will be generated:
       - ./karate/results:/src/target
+    depends_on:
+      hasura:
+        condition: service_healthy

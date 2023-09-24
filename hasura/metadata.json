@@ -1,0 +1,336 @@
+{
+  "resource_version": 3,
+  "metadata": {
+    "version": 3,
+    "sources": [
+      {
+        "name": "default",
+        "kind": "postgres",
+        "tables": [
+          {
+            "table": {
+              "name": "post",
+              "schema": "cms"
+            },
+            "object_relationships": [
+              {
+                "name": "user",
+                "using": {
+                  "foreign_key_constraint_on": "author_id"
+                }
+              }
+            ],
+            "insert_permissions": [
+              {
+                "role": "author",
+                "permission": {
+                  "check": {
+                    "author_id": {
+                      "_eq": "X-Hasura-User-Id"
+                    }
+                  },
+                  "set": {
+                    "author_id": "x-hasura-User-Id"
+                  },
+                  "columns": [
+                    "content",
+                    "status",
+                    "title"
+                  ]
+                },
+                "comment": ""
+              },
+              {
+                "role": "editor",
+                "permission": {
+                  "check": {},
+                  "set": {
+                    "author_id": "x-hasura-user-id"
+                  },
+                  "columns": [
+                    "author_id",
+                    "content",
+                    "status",
+                    "title"
+                  ]
+                },
+                "comment": ""
+              }
+            ],
+            "select_permissions": [
+              {
+                "role": "anonymous",
+                "permission": {
+                  "columns": [
+                    "author_id",
+                    "id",
+                    "content",
+                    "status",
+                    "title",
+                    "created_at"
+                  ],
+                  "filter": {
+                    "status": {
+                      "_eq": "published"
+                    }
+                  }
+                },
+                "comment": ""
+              },
+              {
+                "role": "author",
+                "permission": {
+                  "columns": [
+                    "author_id",
+                    "id",
+                    "content",
+                    "status",
+                    "title",
+                    "created_at"
+                  ],
+                  "filter": {
+                    "_or": [
+                      {
+                        "status": {
+                          "_eq": "published"
+                        }
+                      },
+                      {
+                        "author_id": {
+                          "_eq": "X-Hasura-User-Id"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "comment": ""
+              },
+              {
+                "role": "editor",
+                "permission": {
+                  "columns": [
+                    "author_id",
+                    "id",
+                    "content",
+                    "status",
+                    "title",
+                    "created_at"
+                  ],
+                  "filter": {}
+                },
+                "comment": ""
+              }
+            ],
+            "update_permissions": [
+              {
+                "role": "author",
+                "permission": {
+                  "columns": [
+                    "content",
+                    "status",
+                    "title"
+                  ],
+                  "filter": {
+                    "author_id": {
+                      "_eq": "X-Hasura-User-Id"
+                    }
+                  },
+                  "check": {},
+                  "set": {
+                    "author_id": "x-hasura-"
+                  }
+                },
+                "comment": ""
+              },
+              {
+                "role": "editor",
+                "permission": {
+                  "columns": [
+                    "author_id",
+                    "id",
+                    "content",
+                    "status",
+                    "title",
+                    "created_at"
+                  ],
+                  "filter": {},
+                  "check": {}
+                },
+                "comment": ""
+              }
+            ],
+            "delete_permissions": [
+              {
+                "role": "author",
+                "permission": {
+                  "filter": {
+                    "author_id": {
+                      "_eq": "X-Hasura-User-Id"
+                    }
+                  }
+                },
+                "comment": ""
+              },
+              {
+                "role": "editor",
+                "permission": {
+                  "filter": {}
+                },
+                "comment": ""
+              }
+            ]
+          },
+          {
+            "table": {
+              "name": "user",
+              "schema": "cms"
+            },
+            "array_relationships": [
+              {
+                "name": "posts",
+                "using": {
+                  "foreign_key_constraint_on": {
+                    "column": "author_id",
+                    "table": {
+                      "name": "post",
+                      "schema": "cms"
+                    }
+                  }
+                }
+              }
+            ],
+            "insert_permissions": [
+              {
+                "role": "editor",
+                "permission": {
+                  "check": {},
+                  "columns": [
+                    "email",
+                    "role",
+                    "username"
+                  ]
+                },
+                "comment": ""
+              }
+            ],
+            "select_permissions": [
+              {
+                "role": "anonymous",
+                "permission": {
+                  "columns": [
+                    "role",
+                    "username"
+                  ],
+                  "filter": {
+                    "role": {
+                      "_eq": "author"
+                    }
+                  }
+                },
+                "comment": ""
+              },
+              {
+                "role": "author",
+                "permission": {
+                  "columns": [
+                    "id",
+                    "email",
+                    "role",
+                    "username"
+                  ],
+                  "filter": {
+                    "id": {
+                      "_eq": "X-Hasura-User-Id"
+                    }
+                  }
+                },
+                "comment": ""
+              },
+              {
+                "role": "editor",
+                "permission": {
+                  "columns": [
+                    "id",
+                    "email",
+                    "role",
+                    "username"
+                  ],
+                  "filter": {}
+                },
+                "comment": ""
+              }
+            ],
+            "update_permissions": [
+              {
+                "role": "author",
+                "permission": {
+                  "columns": [
+                    "email",
+                    "role",
+                    "username"
+                  ],
+                  "filter": {
+                    "id": {
+                      "_eq": "X-Hasura-User-Id"
+                    }
+                  },
+                  "check": null
+                },
+                "comment": ""
+              },
+              {
+                "role": "editor",
+                "permission": {
+                  "columns": [
+                    "id",
+                    "email",
+                    "role",
+                    "username"
+                  ],
+                  "filter": {},
+                  "check": {}
+                },
+                "comment": ""
+              }
+            ],
+            "delete_permissions": [
+              {
+                "role": "author",
+                "permission": {
+                  "filter": {
+                    "id": {
+                      "_eq": "X-Hasura-User-Id"
+                    }
+                  }
+                },
+                "comment": ""
+              },
+              {
+                "role": "editor",
+                "permission": {
+                  "filter": {}
+                },
+                "comment": ""
+              }
+            ]
+          }
+        ],
+        "configuration": {
+          "connection_info": {
+            "database_url": {
+              "from_env": "HASURA_GRAPHQL_DATABASE_URL"
+            },
+            "isolation_level": "read-committed",
+            "pool_settings": {
+              "connection_lifetime": 600,
+              "idle_timeout": 180,
+              "max_connections": 50,
+              "retries": 1
+            },
+            "use_prepared_statements": true
+          }
+        }
+      }
+    ]
+  }
+}
